@@ -3,12 +3,15 @@ import Three_D_Components.*;
 
 //TODO Determine if should be static for one instance only or not
 public class Camera {
+    private static Vector3 position = new Vector3(0, 0, 0);
+
     private static float zNear = 1f;
     private static float zFar = 1000f;
     private static float fov = 90f; // In degrees 
     private static float aspectRatio = .5f;
     private static Mat4x4 projectionMatrix = new Mat4x4();
 
+    public static Vector3 getPos()             {return position;}
     public static float getZNear()             {return zNear;}
     public static float getZFar()              {return  zFar;}
     public static float getFov()               {return   fov;}
@@ -16,6 +19,7 @@ public class Camera {
 
     public static Mat4x4 getProjectionMatrix() {return projectionMatrix;}
 
+    public static void setPos(Vector3 newPos)               {position    = newPos;}
     public static void setZNear(float newZNear)             {zNear       = newZNear;}
     public static void setZFar(float newZFar)               {zFar        = newZFar; }
     public static void setFov(float newFov)                 {fov         = newFov;  }

@@ -11,7 +11,7 @@ public class App {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();
         int screenHeight = (int) screenSize.getHeight();
-        float resScaleFactor = 0.1f;
+        float resScaleFactor = 0.5f;
 
         Camera.setAspectRatio( (float) screenHeight / (float) screenWidth );
         // Camera.setAspectRatio( (float) screenWidth / (float) screenHeight );

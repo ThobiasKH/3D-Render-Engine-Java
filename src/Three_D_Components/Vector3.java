@@ -95,6 +95,46 @@ public class Vector3 {
         this.z += point.getZ();
     }
 
+    public static Vector3 cross(Vector3 v0, Vector3 v1) {
+        float x0 = v0.getX();
+        float y0 = v0.getY();
+        float z0 = v0.getZ();
+
+        float x1 = v1.getX();
+        float y1 = v1.getY();
+        float z1 = v1.getZ();
+
+        float nX = y0 * z1 - z0 * y1;
+        float nY = z0 * x1 - x0 * z1;
+        float nZ = x0 * y1 - y0 * x1;
+
+        return new Vector3(nX, nY, nZ);
+    }
+
+    public static float dot(Vector3 vo0, Vector3 vo1) {
+        Vector3 v0 = Vector3.clone(vo0);
+        Vector3 v1 = Vector3.clone(vo1);
+
+        v0 = Vector3.getNormalized(v0);
+        v1 = Vector3.getNormalized(v1);
+
+        return v0.getX() * v1.getX() + v0.getY() * v1.getY() + v0.getZ() * v1.getZ();
+    }
+
+    public static Vector3 getNormalized(Vector3 vector) {
+        float x = vector.getX();
+        float y = vector.getY();
+        float z = vector.getZ();
+
+        float l = Vector3.getLength(vector);
+
+        x /= l;
+        y /= l;
+        z /= l;
+
+        return new Vector3(x, y, z);
+    }
+
     public static float getLength(Vector3 vector) {
         float x = vector.getX();
         float y = vector.getY();

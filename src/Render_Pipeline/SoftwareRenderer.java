@@ -71,20 +71,42 @@ public class SoftwareRenderer extends JFrame {
                 Vector3 v1 = vertices[1];
                 Vector3 v2 = vertices[2];
 
-                Mat4x4 projectionMatrix = Camera.getProjectionMatrix();
+                Vector3 normal = new Vector3(0, 0, 0);
+                Vector3 line1 = new Vector3(0, 0, 0);
+                Vector3 line2 = new Vector3(0, 0, 0);
 
-                Vector3 projectedV0 = Vector3.applyProjectionMatrix(v0, projectionMatrix);
-                Vector3 projectedV1 = Vector3.applyProjectionMatrix(v1, projectionMatrix);
-                Vector3 projectedV2 = Vector3.applyProjectionMatrix(v2, projectionMatrix);
+                line1.setX(v1.getX() - v0.getX());
+                line1.setY(v1.getY() - v0.getY());
+                line1.setZ(v1.getZ() - v0.getZ());
 
-                int x0 = (int) ( (projectedV0.getX() + 1) * 0.5f * (float)  width );
-                int y0 = (int) ( (projectedV0.getY() + 1) * 0.5f * (float) height );
-                int x1 = (int) ( (projectedV1.getX() + 1) * 0.5f * (float)  width );
-                int y1 = (int) ( (projectedV1.getY() + 1) * 0.5f * (float) height );
-                int x2 = (int) ( (projectedV2.getX() + 1) * 0.5f * (float)  width );
-                int y2 = (int) ( (projectedV2.getY() + 1) * 0.5f * (float) height );
+                line2.setX(v2.getX() - v0.getX());
+                line2.setY(v2.getY() - v0.getY());
+                line2.setZ(v2.getZ() - v0.getZ());
 
-                drawTriangle(x0, y0, x1, y1, x2, y2, 0xFFFFFF);
+                normal = Vector3.cross(line1, line2);
+                normal = Vector3.getNormalized(normal);
+
+                Vector3 cameraPosition = Camera.getPos();
+                Vector3 t = new Vector3(v0.getX() - cameraPosition.getX(), v0.getY() - cameraPosition.getY(), v0.getZ() - cameraPosition.getZ());
+                float normalTDotProduct = Vector3.dot(normal, t);
+
+                // if (normal.getZ() > 0) {
+                if (normalTDotProduct > 0f) {
+                    Mat4x4 projectionMatrix = Camera.getProjectionMatrix();
+
+                    Vector3 projectedV0 = Vector3.applyProjectionMatrix(v0, projectionMatrix);
+                    Vector3 projectedV1 = Vector3.applyProjectionMatrix(v1, projectionMatrix);
+                    Vector3 projectedV2 = Vector3.applyProjectionMatrix(v2, projectionMatrix);
+
+                    int x0 = (int) ( (projectedV0.getX() + 1) * 0.5f * (float)  width );
+                    int y0 = (int) ( (projectedV0.getY() + 1) * 0.5f * (float) height );
+                    int x1 = (int) ( (projectedV1.getX() + 1) * 0.5f * (float)  width );
+                    int y1 = (int) ( (projectedV1.getY() + 1) * 0.5f * (float) height );
+                    int x2 = (int) ( (projectedV2.getX() + 1) * 0.5f * (float)  width );
+                    int y2 = (int) ( (projectedV2.getY() + 1) * 0.5f * (float) height );
+
+                    drawTriangle(x0, y0, x1, y1, x2, y2, 0xFFFFFF);
+                }
             }
         }
     }
