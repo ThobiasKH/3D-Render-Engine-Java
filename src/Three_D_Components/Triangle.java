@@ -27,5 +27,41 @@ public class Triangle {
         this.p[2] = v3;
     }
 
+    public Vector3 getCenter() {
+        float centerX = 0f;
+        float centerY = 0f;
+        float centerZ = 0f;
+
+        for (Vector3 v : this.p) {
+            centerX += v.getX();
+            centerY += v.getY();
+            centerZ += v.getZ();
+        }
+        
+        centerX /= 3;
+        centerY /= 3;
+        centerZ /= 3;
+
+        return new Vector3(centerX, centerY, centerZ);
+    }
+
+    public void rotateAroundXAxisWithPoint(float angleInRadians, Vector3 point) {
+        for (Vector3 v : this.p) {
+            v.rotateAroundXAxisWithPoint(angleInRadians, point);
+        }
+    }
+
+    public void rotateAroundYAxisWithPoint(float angleInRadians, Vector3 point) {
+        for (Vector3 v : this.p) {
+            v.rotateAroundYAxisWithPoint(angleInRadians, point);
+        }
+    }
+
+    public void rotateAroundZAxisWithPoint(float angleInRadians, Vector3 point) {
+        for (Vector3 v : this.p) {
+            v.rotateAroundZAxisWithPoint(angleInRadians, point);
+        }
+    }
+
     public Vector3[] getVertices() { return p; }
 }

@@ -73,9 +73,9 @@ public class SoftwareRenderer extends JFrame {
 
                 Mat4x4 projectionMatrix = Camera.getProjectionMatrix();
 
-                Vector3 projectedV0 = Mat4x4.vec3Multiplication(v0, projectionMatrix);
-                Vector3 projectedV1 = Mat4x4.vec3Multiplication(v1, projectionMatrix);
-                Vector3 projectedV2 = Mat4x4.vec3Multiplication(v2, projectionMatrix);
+                Vector3 projectedV0 = Vector3.applyProjectionMatrix(v0, projectionMatrix);
+                Vector3 projectedV1 = Vector3.applyProjectionMatrix(v1, projectionMatrix);
+                Vector3 projectedV2 = Vector3.applyProjectionMatrix(v2, projectionMatrix);
 
                 int x0 = (int) ( (projectedV0.getX() + 1) * 0.5f * (float)  width );
                 int y0 = (int) ( (projectedV0.getY() + 1) * 0.5f * (float) height );

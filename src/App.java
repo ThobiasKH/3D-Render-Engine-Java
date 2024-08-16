@@ -19,7 +19,7 @@ public class App {
 
         SoftwareRenderer renderer = new SoftwareRenderer(screenWidth, screenHeight, resScaleFactor);
         
-        float xMod = 0.5f;
+        float xMod = 0f;
 
         Triangle tri1 = new Triangle(
             -0.5f - xMod, -0.5f, -0.5f + 2,  // v0
@@ -100,16 +100,14 @@ public class App {
 
         Triangle[] cubeTriangles = {tri1, tri2, tri3, tri4, tri5, tri6, tri7, tri8, tri9, tri10, tri11, tri12};
 
-        Mesh meshPlane = new Mesh(cubeTriangles);
-        renderer.addMesh(meshPlane);
+        Mesh meshCube = new Mesh(cubeTriangles);
+        renderer.addMesh(meshCube);
 
         while (true) {
-            for (Triangle tri : meshPlane.getTriangles()) {
-                for (Vector3 vertex : tri.getVertices()) {
-                    vertex.setX(vertex.getX() + 0.001f);
-                    vertex.setZ(vertex.getZ() + 0.01f);
-                }
-            }
+            Vector3 cubeCenter = meshCube.getCenter();
+            meshCube.rotateAroundXAxisWithPoint(0.01f, cubeCenter);
+            meshCube.rotateAroundYAxisWithPoint(0.01f, cubeCenter);
+            meshCube.rotateAroundZAxisWithPoint(0.01f, cubeCenter);
 
             renderer.renderMeshes();
 
