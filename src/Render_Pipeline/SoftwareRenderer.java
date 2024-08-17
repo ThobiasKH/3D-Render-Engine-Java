@@ -14,6 +14,10 @@ public class SoftwareRenderer extends JFrame {
     private BufferedImage canvas;
     private int width, height;
 
+    //! Debug stuff should probably be removed or relocated l8r
+    public boolean debugger_displayFPS = false;
+    public int debugger_timeSinceLastFrameMS = 0;
+
     ArrayList<Mesh> meshes = new ArrayList<Mesh>();
 
     public SoftwareRenderer(int width, int height) {
@@ -57,7 +61,66 @@ public class SoftwareRenderer extends JFrame {
 
     public void renderMeshes() {
         Graphics2D g2d = canvas.createGraphics();
-        g2d.scale(10, 2);
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(0, 0, width, height);
+        g2d.dispose();
+
+        // Absolutely disgusting stuff
+        Mat4x4 projectionMatrix = Camera.getProjectionMatrix();
+        for (Mesh mesh : meshes) {
+            for (Triangle tri : mesh.getTriangles()) {
+                Vector3[] vertices = tri.getVertices();
+                Vector3 t0 = vertices[0];
+                Vector3 t1 = vertices[1];
+                Vector3 t2 = vertices[2];
+            
+                // Compute vectors and dot products once
+                Vector3 cameraPosition = Camera.getPos();
+                Vector3 t0ToCamera = Vector3.subtract(t0, cameraPosition);
+                float normalTDotProduct = Vector3.dot(tri.getNormal(), t0ToCamera);
+            
+                if (normalTDotProduct > 0f) {
+                    Vector3 projectedV0 = Vector3.applyProjectionMatrix(t0, projectionMatrix);
+                    Vector3 projectedV1 = Vector3.applyProjectionMatrix(t1, projectionMatrix);
+                    Vector3 projectedV2 = Vector3.applyProjectionMatrix(t2, projectionMatrix);
+                
+                    int x0 = (int) ((projectedV0.getX() + 1) * 0.5f * width);
+                    int y0 = (int) ((projectedV0.getY() + 1) * 0.5f * height);
+                    int x1 = (int) ((projectedV1.getX() + 1) * 0.5f * width);
+                    int y1 = (int) ((projectedV1.getY() + 1) * 0.5f * height);
+                    int x2 = (int) ((projectedV2.getX() + 1) * 0.5f * width);
+                    int y2 = (int) ((projectedV2.getY() + 1) * 0.5f * height);
+                
+                    int[] boundingBox = calculateScreenBoundingBoxForTriangle(x0, y0, x1, y1, x2, y2);
+                
+                    // Calculate bounding box limits
+                    int startY = Math.max(boundingBox[1], 0);
+                    int endY = Math.min(boundingBox[5], height);
+                    int startX = Math.max(boundingBox[0], 0);
+                    int endX = Math.min(boundingBox[4], width);
+                
+                    // Rasterize the triangle
+                    rasterizeTriangle(startX, endX, startY, endY, x0, y0, x1, y1, x2, y2);
+                }
+            }
+        }
+    }
+
+    private void rasterizeTriangle(int startX, int endX, int startY, int endY, int x0, int y0, int x1, int y1, int x2, int y2) {
+        for (int y = startY; y <= endY; y++) {
+            for (int x = startX; x <= endX; x++) {
+                if (isPointInsideTriangle(x, y, x0, y0, x1, y1, x2, y2)) {
+                    setPixel(x, y, 0xFFFFFF);
+                }
+            }
+        }
+    }
+
+    public void renderMeshesWireframe() {
+        // scaleFactor += 0.0001f;
+        // canvas = new BufferedImage((int)(width * scaleFactor), (int)(height * scaleFactor), BufferedImage.TYPE_INT_RGB);
+
+        Graphics2D g2d = canvas.createGraphics();
         g2d.setColor(Color.BLACK);
         g2d.fillRect(0, 0, width, height);
         g2d.dispose();
@@ -71,20 +134,7 @@ public class SoftwareRenderer extends JFrame {
                 Vector3 v1 = vertices[1];
                 Vector3 v2 = vertices[2];
 
-                Vector3 normal = new Vector3(0, 0, 0);
-                Vector3 line1 = new Vector3(0, 0, 0);
-                Vector3 line2 = new Vector3(0, 0, 0);
-
-                line1.setX(v1.getX() - v0.getX());
-                line1.setY(v1.getY() - v0.getY());
-                line1.setZ(v1.getZ() - v0.getZ());
-
-                line2.setX(v2.getX() - v0.getX());
-                line2.setY(v2.getY() - v0.getY());
-                line2.setZ(v2.getZ() - v0.getZ());
-
-                normal = Vector3.cross(line1, line2);
-                normal = Vector3.getNormalized(normal);
+                Vector3 normal = tri.getNormal();
 
                 Vector3 cameraPosition = Camera.getPos();
                 Vector3 t = new Vector3(v0.getX() - cameraPosition.getX(), v0.getY() - cameraPosition.getY(), v0.getZ() - cameraPosition.getZ());
@@ -105,10 +155,43 @@ public class SoftwareRenderer extends JFrame {
                     int x2 = (int) ( (projectedV2.getX() + 1) * 0.5f * (float)  width );
                     int y2 = (int) ( (projectedV2.getY() + 1) * 0.5f * (float) height );
 
-                    drawTriangle(x0, y0, x1, y1, x2, y2, 0xFFFFFF);
+                    drawTriangle(x0, y0, x1, y1, x2, y2, 0xFF0000);
                 }
             }
         }
+    }
+
+    // Clock-Wise winding starting top-left, vertices must be projected
+    private int[] calculateScreenBoundingBoxForTriangle(int v0x, int v0y, int v1x, int v1y, int v2x, int v2y) {
+        int[] vertices = new int[8];
+
+        int minX = Math.min(Math.min(v0x, v1x), v2x);
+        int minY = Math.min(Math.min(v0y, v1y), v2y);
+        int maxX = Math.max(Math.max(v0x, v1x), v2x);
+        int maxY = Math.max(Math.max(v0y, v1y), v2y);
+
+        int width  = maxX - minX;
+        int height = maxY - minY;
+
+        vertices[0] = minX;          // Top-Left X
+        vertices[1] = minY;          // Top-Left Y
+        vertices[2] = minX + width;  // Top-Right X
+        vertices[3] = minY;          // Top-Right Y
+        vertices[4] = minX + width;  // Bottom-Right X
+        vertices[5] = minY + height; // Bottom-Right Y
+        vertices[6] = minX;          // Bottom-Left X
+        vertices[7] = minY + height; // Bottom-Left Y
+
+        return vertices;
+    }
+
+    private boolean isPointInsideTriangle(int px, int py, int x0, int y0, int x1, int y1, int x2, int y2) {
+        float areaOrig = Math.abs((x0 * (y1 - y2) + x1 * (y2 - y0) + x2 * (y0 - y1)) / 2.0f);
+        float area1 = Math.abs((px * (y1 - y2) + x1 * (y2 - py) + x2 * (py - y1)) / 2.0f);
+        float area2 = Math.abs((x0 * (py - y2) + px * (y2 - y0) + x2 * (y0 - py)) / 2.0f);
+        float area3 = Math.abs((x0 * (y1 - py) + x1 * (py - y0) + px * (y0 - y1)) / 2.0f);
+    
+        return Math.abs(area1 + area2 + area3 - areaOrig) < 1e-6;
     }
 
     private void drawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, int color) {
@@ -144,8 +227,15 @@ public class SoftwareRenderer extends JFrame {
     @Override
     public void paint(Graphics g) 
     {
-        // super.paint(g);
-        
         g.drawImage(canvas, 0, 0, width, height, null);
+
+        if (debugger_displayFPS) {
+            Font baseFont = new Font("Arial", Font.PLAIN, 12);
+            Font scaledFont = baseFont.deriveFont(64f);
+            g.setFont(scaledFont);
+
+            g.setColor(Color.WHITE);
+            g.drawString(Integer.toString(debugger_timeSinceLastFrameMS) + "ms", 0 + (int) (width * 0.01f), height);
+        }
     }
 }

@@ -63,5 +63,27 @@ public class Triangle {
         }
     }
 
+    public Vector3 getNormal() {
+        Vector3 v0 = this.p[0];
+        Vector3 v1 = this.p[1];
+        Vector3 v2 = this.p[2];
+
+        Vector3 normal = new Vector3(0, 0, 0);
+        Vector3 line1 = new Vector3(0, 0, 0);
+        Vector3 line2 = new Vector3(0, 0, 0);
+
+        line1.setX(v1.getX() - v0.getX());
+        line1.setY(v1.getY() - v0.getY());
+        line1.setZ(v1.getZ() - v0.getZ());
+        line2.setX(v2.getX() - v0.getX());
+        line2.setY(v2.getY() - v0.getY());
+        line2.setZ(v2.getZ() - v0.getZ());
+
+        normal = Vector3.cross(line1, line2);
+        normal = Vector3.getNormalized(normal);
+
+        return normal;
+    }
+
     public Vector3[] getVertices() { return p; }
 }

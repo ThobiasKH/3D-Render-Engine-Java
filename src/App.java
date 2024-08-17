@@ -7,17 +7,20 @@ import java.awt.Toolkit;
 import Render_Pipeline.*;
 
 public class App {
+    static int desiredFPS = 60;
     public static void main(String[] args) throws Exception {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();
         int screenHeight = (int) screenSize.getHeight();
-        float resScaleFactor = 0.5f;
+        // float resScaleFactor = .005f;
+        float resScaleFactor = .1f;
 
         Camera.setAspectRatio( (float) screenHeight / (float) screenWidth );
         // Camera.setAspectRatio( (float) screenWidth / (float) screenHeight );
         Camera.updateProjectionMatrix();
 
         SoftwareRenderer renderer = new SoftwareRenderer(screenWidth, screenHeight, resScaleFactor);
+        renderer.debugger_displayFPS = true;
         
         float xMod = 0f;
 
@@ -103,6 +106,7 @@ public class App {
         Mesh meshCube = new Mesh(cubeTriangles);
         renderer.addMesh(meshCube);
 
+        long startTime = System.currentTimeMillis();
         while (true) {
             Vector3 cubeCenter = meshCube.getCenter();
             meshCube.rotateAroundXAxisWithPoint(0.01f, cubeCenter);
@@ -110,11 +114,17 @@ public class App {
             meshCube.rotateAroundZAxisWithPoint(0.01f, cubeCenter);
 
             renderer.renderMeshes();
+            // renderer.renderMeshesWireframe();
 
             renderer.repaint();
 
+            long newTime = System.currentTimeMillis();
+            renderer.debugger_timeSinceLastFrameMS = (int) (newTime - startTime);
+            startTime = newTime;
+            System.out.println(renderer.debugger_timeSinceLastFrameMS + "ms");
+
             try {
-                Thread.sleep(1000 / 60);
+                Thread.sleep(1000 / desiredFPS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

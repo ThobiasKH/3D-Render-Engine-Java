@@ -147,4 +147,21 @@ public class Vector3 {
         Vector3 result = new Vector3(vectorToBeCloned.getX(), vectorToBeCloned.getY(), vectorToBeCloned.getZ());
         return result;
     }
+
+    public static Vector3 add(Vector3 v1, Vector3 v2) {
+        return new Vector3(v1.getX() + v2.getX(), v1.getY() + v2.getY(), v1.getZ() + v2.getZ());
+    }
+
+    public static Vector3 subtract(Vector3 v1, Vector3 v2) {
+        return new Vector3(v1.getX() - v2.getX(), v1.getY() - v2.getY(), v1.getZ() - v2.getZ());
+    }
+
+    public static Vector3 multiply(Vector3 v, float scalar) {
+        return new Vector3(v.getX() * scalar, v.getY() * scalar, v.getZ() * scalar);
+    }
+
+    public static Vector3 divide(Vector3 v, float scalar) {
+        if (scalar == 0) throw new IllegalArgumentException("Scalar value cannot be zero.");
+        return new Vector3(v.getX() / scalar, v.getY() / scalar, v.getZ() / scalar);
+    }
 }
