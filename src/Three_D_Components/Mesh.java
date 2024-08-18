@@ -33,6 +33,20 @@ public class Mesh {
         return new Vector3(centerX, centerY, centerZ);
     }
 
+    public void move(Vector3 movementVector) {
+        for (Triangle tri : this.triangles) {
+            tri.move(movementVector);
+        }
+    }
+
+    public void moveTo(Vector3 newPosition) {
+        Vector3 currentCenter = this.getCenter();
+
+        Vector3 translation = Vector3.subtract(newPosition, currentCenter);
+
+        this.move(translation);
+    }
+
     public void rotateAroundXAxisWithPoint(float angleInRadians, Vector3 point) {
         for (Triangle tri : this.triangles) {
             tri.rotateAroundXAxisWithPoint(angleInRadians, point);

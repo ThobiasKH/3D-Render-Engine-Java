@@ -12,15 +12,12 @@ public class App {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();
         int screenHeight = (int) screenSize.getHeight();
-        // float resScaleFactor = .005f;
-        float resScaleFactor = .1f;
+        float resScaleFactor = .25f;
 
         Camera.setAspectRatio( (float) screenHeight / (float) screenWidth );
-        // Camera.setAspectRatio( (float) screenWidth / (float) screenHeight );
         Camera.updateProjectionMatrix();
 
         SoftwareRenderer renderer = new SoftwareRenderer(screenWidth, screenHeight, resScaleFactor);
-        renderer.debugger_displayFPS = true;
         
         float xMod = 0f;
 
@@ -106,22 +103,30 @@ public class App {
         Mesh meshCube = new Mesh(cubeTriangles);
         renderer.addMesh(meshCube);
 
-        long startTime = System.currentTimeMillis();
+        // int iterations = 0;
+        // int sumMS = 0;
+
         while (true) {
+            // iterations++;
+
             Vector3 cubeCenter = meshCube.getCenter();
+            meshCube.move(new Vector3(0, 0, -0.01f));
+
             meshCube.rotateAroundXAxisWithPoint(0.01f, cubeCenter);
             meshCube.rotateAroundYAxisWithPoint(0.01f, cubeCenter);
             meshCube.rotateAroundZAxisWithPoint(0.01f, cubeCenter);
 
+            long startTime = System.currentTimeMillis();
+
             renderer.renderMeshes();
             // renderer.renderMeshesWireframe();
 
+            System.out.println("Render: " + (System.currentTimeMillis() - startTime) + "ms");
+
             renderer.repaint();
 
-            long newTime = System.currentTimeMillis();
-            renderer.debugger_timeSinceLastFrameMS = (int) (newTime - startTime);
-            startTime = newTime;
-            System.out.println(renderer.debugger_timeSinceLastFrameMS + "ms");
+            // sumMS += renderer.debugger_timeSinceLastFrameMS;
+            // System.out.println("Average frametime = " + (int) (sumMS / iterations) + "ms");
 
             try {
                 Thread.sleep(1000 / desiredFPS);

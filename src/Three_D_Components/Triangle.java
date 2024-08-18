@@ -11,6 +11,7 @@ public class Triangle {
     }
 
     public Triangle(Vector3 v0, Vector3 v1, Vector3 v2) {
+        this.p = new Vector3[3];
         this.p[0] = v0;
         this.p[1] = v1;
         this.p[2] = v2;
@@ -43,6 +44,19 @@ public class Triangle {
         centerZ /= 3;
 
         return new Vector3(centerX, centerY, centerZ);
+    }
+
+    //* remember moveto
+    public void move(Vector3 movementVector) {
+        for (int i = 0; i < 3; i++) {
+            this.p[i] = Vector3.add(this.p[i], movementVector);
+        }
+    }
+
+    public void moveTo(Vector3 position) {
+        Vector3 center = this.getCenter();
+        Vector3 translation = Vector3.subtract(position, center);
+        this.move(translation);
     }
 
     public void rotateAroundXAxisWithPoint(float angleInRadians, Vector3 point) {
