@@ -1,7 +1,6 @@
 package Render_Pipeline;
 import Three_D_Components.*;
 
-//TODO Determine if should be static for one instance only or not
 public class Camera {
     private static Vector3 position = new Vector3(0, 0, 0);
 

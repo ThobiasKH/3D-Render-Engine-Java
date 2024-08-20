@@ -2,6 +2,7 @@ package Three_D_Components;
 
 public class Triangle {
     private Vector3[] p;
+    public int DEBUGCOLOR = 0xFFFFFF;
 
     public Triangle(Vector3[] vectors) {
         if (vectors.length != 3) {

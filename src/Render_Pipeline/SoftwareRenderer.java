@@ -86,7 +86,7 @@ public class SoftwareRenderer extends JFrame {
                 Vector3 t0ToCamera = Vector3.subtract(t0, cameraPosition);
                 float normalTDotProduct = Vector3.dot(tri.getNormal(), t0ToCamera);
             
-                if (normalTDotProduct > 0) {
+                if (normalTDotProduct < 0) {
                     Vector3 projectedV0 = Vector3.applyProjectionMatrix(t0, projectionMatrix);
                     Vector3 projectedV1 = Vector3.applyProjectionMatrix(t1, projectionMatrix);
                     Vector3 projectedV2 = Vector3.applyProjectionMatrix(t2, projectionMatrix);
@@ -105,17 +105,17 @@ public class SoftwareRenderer extends JFrame {
                     int startX = Math.max(boundingBox[0], 0);
                     int endX = Math.min(boundingBox[2], canvasWidth);
                 
-                    rasterizeTriangle(startX, endX, startY, endY, x0, y0, x1, y1, x2, y2);
+                    rasterizeTriangle(tri.DEBUGCOLOR, startX, endX, startY, endY, x0, y0, x1, y1, x2, y2);
                 }
             }
         }
     }
 
-    private void rasterizeTriangle(int startX, int endX, int startY, int endY, int x0, int y0, int x1, int y1, int x2, int y2) {
+    private void rasterizeTriangle(int color, int startX, int endX, int startY, int endY, int x0, int y0, int x1, int y1, int x2, int y2) {
         for (int y = startY; y <= endY; y++) {
             for (int x = startX; x <= endX; x++) {
                 if (isPointInsideTriangle(x, y, x0, y0, x1, y1, x2, y2)) {
-                    setPixel(x, y, 0xFFFFFF);
+                    setPixel(x, y, color);
                 }
             }
         }
@@ -146,7 +146,7 @@ public class SoftwareRenderer extends JFrame {
                 float normalTDotProduct = Vector3.dot(normal, t);
 
                 // if (normal.getZ() > 0) {
-                if (normalTDotProduct > 0f) {
+                if (normalTDotProduct < 0f) {
                     Mat4x4 projectionMatrix = Camera.getProjectionMatrix();
 
                     Vector3 projectedV0 = Vector3.applyProjectionMatrix(v0, projectionMatrix);
