@@ -8,7 +8,7 @@ import java.util.Random;
 import Render_Pipeline.*;
 
 public class App {
-    static int desiredFPS = 60;
+    static final int FPS_TARGET = 1000;
     public static void main(String[] args) throws Exception {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();
@@ -32,24 +32,28 @@ public class App {
             cubeTris[i].DEBUGCOLOR = randomColor;
         } 
 
+        long startTime = System.currentTimeMillis();
+        long deltaTime = 1;
+
         while (true) {
             Vector3 cubeCenter = meshCube.getCenter();
-            // meshCube.move(new Vector3(0, 0, 0.01f));
 
-            // meshCube.rotateAroundXAxisWithPoint(0.01f, cubeCenter);
-            meshCube.rotateAroundYAxisWithPoint(0.01f, cubeCenter);
-            // meshCube.rotateAroundZAxisWithPoint(0.01f, cubeCenter);
-
-            long startTime = System.currentTimeMillis();
+            meshCube.rotateAroundXAxisWithPoint(0.001f * deltaTime, cubeCenter);
+            meshCube.rotateAroundYAxisWithPoint(0.001f * deltaTime, cubeCenter);
+            meshCube.rotateAroundZAxisWithPoint(0.001f * deltaTime, cubeCenter);
 
             renderer.renderMeshes();
 
-            System.out.println("Render: " + (System.currentTimeMillis() - startTime) + "ms");
-
             renderer.repaint();
+        
+            long endTime = System.currentTimeMillis();
+            deltaTime = endTime - startTime;
+            startTime = endTime;
+
+            System.out.println("Render: " + deltaTime + "ms");
 
             try {
-                Thread.sleep(1000 / desiredFPS);
+                Thread.sleep(1000 / FPS_TARGET);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
