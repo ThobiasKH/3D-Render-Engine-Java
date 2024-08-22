@@ -1,8 +1,9 @@
 package Render_Pipeline;
 
-import Three_D_Components.*;
-
 import javax.swing.*;
+
+import BaseComponents.*;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -16,7 +17,11 @@ public class SoftwareRenderer extends JFrame {
     private int canvasWidth, canvasHeight;
     private int canvasWidthInverse, canvasHeightInverse;
 
-    ArrayList<Mesh> meshes = new ArrayList<Mesh>();
+    public boolean DEBUG_DRAW_WIREFRAME = false;
+    public int DEBUG_DRAW_WIREFRAME_COLOR = 0x000000;
+
+    private ArrayList<Mesh> meshes = new ArrayList<Mesh>();
+    private DirectionalLight directionalLight;
 
     public SoftwareRenderer(int width, int height) {
         this.width = width;
@@ -67,6 +72,10 @@ public class SoftwareRenderer extends JFrame {
         meshes.add(mesh);
     }
 
+    public void setDirectionalLight(DirectionalLight light) {
+        this.directionalLight = light;
+    }
+
     public void renderMeshes() {
         Graphics2D g2d = canvas.createGraphics();
         g2d.setColor(Color.BLACK);
@@ -83,10 +92,18 @@ public class SoftwareRenderer extends JFrame {
                 Vector3 t1 = vertices[1];
                 Vector3 t2 = vertices[2];
             
+                Vector3 triNormal = tri.getNormal();
                 Vector3 t0ToCamera = Vector3.subtract(t0, cameraPosition);
-                float normalTDotProduct = Vector3.dot(tri.getNormal(), t0ToCamera);
+                float normalTDotProduct = Vector3.dot(triNormal, t0ToCamera);
             
                 if (normalTDotProduct < 0) {
+                    int color = tri.getColor();
+                    if (this.directionalLight != null) {
+                        Vector3 lightDirection = this.directionalLight.getDirection();
+                        float dp = Vector3.dot(triNormal, lightDirection);
+                        color = adjustColorForLight(color, dp * this.directionalLight.getIntensity());
+                    }
+
                     Vector3 projectedV0 = Vector3.applyProjectionMatrix(t0, projectionMatrix);
                     Vector3 projectedV1 = Vector3.applyProjectionMatrix(t1, projectionMatrix);
                     Vector3 projectedV2 = Vector3.applyProjectionMatrix(t2, projectionMatrix);
@@ -105,7 +122,11 @@ public class SoftwareRenderer extends JFrame {
                     int startX = Math.max(boundingBox[0], 0);
                     int endX = Math.min(boundingBox[2], canvasWidth);
                 
-                    rasterizeTriangle(tri.DEBUGCOLOR, startX, endX, startY, endY, x0, y0, x1, y1, x2, y2);
+                    rasterizeTriangle(color, startX, endX, startY, endY, x0, y0, x1, y1, x2, y2);
+
+                    if (DEBUG_DRAW_WIREFRAME) {
+                        drawTriangle(x0, y0, x1, y1, x2, y2, DEBUG_DRAW_WIREFRAME_COLOR);
+                    }
                 }
             }
         }
@@ -116,51 +137,6 @@ public class SoftwareRenderer extends JFrame {
             for (int x = startX; x <= endX; x++) {
                 if (isPointInsideTriangle(x, y, x0, y0, x1, y1, x2, y2)) {
                     setPixel(x, y, color);
-                }
-            }
-        }
-    }
-
-    public void renderMeshesWireframe() {
-        // scaleFactor += 0.0001f;
-        // canvas = new BufferedImage((int)(width * scaleFactor), (int)(height * scaleFactor), BufferedImage.TYPE_INT_RGB);
-
-        Graphics2D g2d = canvas.createGraphics();
-        g2d.setColor(Color.BLACK);
-        g2d.fillRect(0, 0, width, height);
-        g2d.dispose();
-
-        for (Mesh mesh : meshes) {
-            for (Triangle tri : mesh.getTriangles()) {
-
-                Vector3[] vertices = tri.getVertices();
-
-                Vector3 v0 = vertices[0];
-                Vector3 v1 = vertices[1];
-                Vector3 v2 = vertices[2];
-
-                Vector3 normal = tri.getNormal();
-
-                Vector3 cameraPosition = Camera.getPos();
-                Vector3 t = new Vector3(v0.getX() - cameraPosition.getX(), v0.getY() - cameraPosition.getY(), v0.getZ() - cameraPosition.getZ());
-                float normalTDotProduct = Vector3.dot(normal, t);
-
-                // if (normal.getZ() > 0) {
-                if (normalTDotProduct < 0f) {
-                    Mat4x4 projectionMatrix = Camera.getProjectionMatrix();
-
-                    Vector3 projectedV0 = Vector3.applyProjectionMatrix(v0, projectionMatrix);
-                    Vector3 projectedV1 = Vector3.applyProjectionMatrix(v1, projectionMatrix);
-                    Vector3 projectedV2 = Vector3.applyProjectionMatrix(v2, projectionMatrix);
-
-                    int x0 = (int) ( (projectedV0.getX() + 1) * 0.5f * (float)  canvasWidth);
-                    int y0 = (int) ( (projectedV0.getY() + 1) * 0.5f * (float) canvasHeight);
-                    int x1 = (int) ( (projectedV1.getX() + 1) * 0.5f * (float)  canvasWidth);
-                    int y1 = (int) ( (projectedV1.getY() + 1) * 0.5f * (float) canvasHeight);
-                    int x2 = (int) ( (projectedV2.getX() + 1) * 0.5f * (float)  canvasWidth);
-                    int y2 = (int) ( (projectedV2.getY() + 1) * 0.5f * (float) canvasHeight);
-
-                    drawTriangle(x0, y0, x1, y1, x2, y2, 0xFF0000);
                 }
             }
         }
@@ -185,22 +161,6 @@ public class SoftwareRenderer extends JFrame {
         return lambda1 >= 0 && lambda2 >= 0 && lambda3 >= 0;
     }
 
-    // This method should be faster, but isn't for some reason
-    // public boolean isPointInsideTriangle(int px, int py, int x1, int y1, int x2, int y2, int x3, int y3) {
-    //     int d1 = sign(px, py, x1, y1, x2, y2);
-    //     int d2 = sign(px, py, x2, y2, x3, y3);
-    //     int d3 = sign(px, py, x3, y3, x1, y1);
-    
-    //     boolean hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
-    //     boolean hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
-    
-    //     return !(hasNeg && hasPos);
-    // }
-    
-    // private int sign(int px, int py, int x1, int y1, int x2, int y2) {
-    //     return (px - x2) * (y1 - y2) - (x1 - x2) * (py - y2);
-    // }
-
     private void drawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, int color) {
         drawLine(x0, y0, x1, y1, color);
         drawLine(x1, y1, x2, y2, color);
@@ -215,9 +175,9 @@ public class SoftwareRenderer extends JFrame {
         int err = dx - dy;
 
         while (true) {
-            setPixel(x0, y0, color);  // Set the current pixel
+            setPixel(x0, y0, color);
 
-            if (x0 == x1 && y0 == y1) break;  // End the loop if the line has been drawn
+            if (x0 == x1 && y0 == y1) break;
 
             int e2 = 2 * err;
             if (e2 > -dy) {
@@ -229,6 +189,24 @@ public class SoftwareRenderer extends JFrame {
                 y0 += sy;
             }
         }
+    }
+
+    public static int adjustColorForLight(int color, float strength) {
+        int red = (color >> 16) & 0xFF;
+        int green = (color >> 8) & 0xFF;
+        int blue = color & 0xFF;
+
+        float normStrength = (strength + 1) * 0.5f;
+
+        int adjustedRed = (int) (red * strength);
+        int adjustedGreen = (int) (green * strength);
+        int adjustedBlue = (int) (blue * strength);
+    
+        adjustedRed = Math.max(0, Math.min(255, adjustedRed));
+        adjustedGreen = Math.max(0, Math.min(255, adjustedGreen));
+        adjustedBlue = Math.max(0, Math.min(255, adjustedBlue));
+    
+        return (adjustedRed << 16) | (adjustedGreen << 8) | adjustedBlue;
     }
 
     @Override

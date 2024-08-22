@@ -1,4 +1,4 @@
-package Three_D_Components;
+package BaseComponents;
 
 public class Mesh {
     private Triangle[] triangles;

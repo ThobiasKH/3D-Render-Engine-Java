@@ -1,5 +1,5 @@
 package Render_Pipeline;
-import Three_D_Components.*;
+import BaseComponents.*;
 
 public class Camera {
     private static Vector3 position = new Vector3(0, 0, 0);

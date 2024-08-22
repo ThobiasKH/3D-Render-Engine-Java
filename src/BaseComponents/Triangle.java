@@ -1,8 +1,8 @@
-package Three_D_Components;
+package BaseComponents;
 
 public class Triangle {
     private Vector3[] p;
-    public int DEBUGCOLOR = 0xFFFFFF;
+    public int color = 0xFFFFFF;
 
     public Triangle(Vector3[] vectors) {
         if (vectors.length != 3) {
@@ -99,6 +99,10 @@ public class Triangle {
 
         return normal;
     }
+
+    public int getColor() {return this.color;}
+
+    public void setColor(int color) {this.color = color;}
 
     public Vector3[] getVertices() { return p; }
 }

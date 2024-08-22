@@ -1,10 +1,8 @@
-import Three_D_Components.*;
-import Three_D_Components.Vector3;
-
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.Random;
 
+import BaseComponents.*;
 import Render_Pipeline.*;
 
 public class App {
@@ -21,19 +19,24 @@ public class App {
         SoftwareRenderer renderer = new SoftwareRenderer(screenWidth, screenHeight, resScaleFactor);
 
         Mesh meshCube = Mesh.createMeshCube(2, new Vector3(0, 0, 5));
-
         renderer.addMesh(meshCube);
+
+        DirectionalLight light1 = new DirectionalLight(1f, new Vector3(0, 0, -1));
+        renderer.setDirectionalLight(light1);
+
 
         Random rand = new Random();
         int randomColor = 0;
         Triangle[] cubeTris = meshCube.getTriangles();
         for (int i = 0; i < 12; i++) {
             if (i % 2 == 0) randomColor = rand.nextInt();
-            cubeTris[i].DEBUGCOLOR = randomColor;
+            cubeTris[i].setColor(randomColor);
         } 
 
         long startTime = System.currentTimeMillis();
         long deltaTime = 1;
+
+        renderer.DEBUG_DRAW_WIREFRAME = true;
 
         while (true) {
             Vector3 cubeCenter = meshCube.getCenter();

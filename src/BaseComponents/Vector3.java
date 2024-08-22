@@ -1,4 +1,4 @@
-package Three_D_Components;
+package BaseComponents;
 
 public class Vector3 {
     private float x;
