@@ -1,12 +1,11 @@
+import BaseComponents.*;
+import Render_Pipeline.*;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.Random;
 
-import BaseComponents.*;
-import Render_Pipeline.*;
-
 public class App {
-    static final int FPS_TARGET = 1000;
+    static final int FPS_TARGET = 60;
     public static void main(String[] args) throws Exception {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();
@@ -21,7 +20,7 @@ public class App {
         Mesh meshCube = Mesh.createMeshCube(2, new Vector3(0, 0, 5));
         renderer.addMesh(meshCube);
 
-        DirectionalLight light1 = new DirectionalLight(1f, new Vector3(0, 0, -1));
+        DirectionalLight light1 = new DirectionalLight(.5f, new Vector3(0, 0, -1));
         renderer.setDirectionalLight(light1);
 
 
