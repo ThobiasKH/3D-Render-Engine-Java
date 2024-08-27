@@ -2,18 +2,24 @@ package RenderPipeline;
 
 import javax.swing.*;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import BaseComponents.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import javax.imageio.ImageIO;
 
 public class SoftwareRenderer extends JFrame {
 
     private float scaleFactor = 1f;
 
     private BufferedImage canvas;
-    private int width, height;
+    static private int width, height;
     private int canvasWidth, canvasHeight;
     private int canvasWidthInverse, canvasHeightInverse;
 
@@ -23,6 +29,12 @@ public class SoftwareRenderer extends JFrame {
     private ArrayList<Mesh> meshes = new ArrayList<Mesh>();
     private DirectionalLight directionalLight;
 
+    public static boolean mouseIsDown = false;
+
+    static Robot robot = null;
+    static int mouseLastX, mouseLastY;
+    public static int mouseDiffX, mouseDiffY;
+
     public SoftwareRenderer(int width, int height) {
         this.width = width;
         this.height = height;
@@ -31,6 +43,20 @@ public class SoftwareRenderer extends JFrame {
         canvasHeight = (int) (height * scaleFactor);
         canvasWidthInverse = (int) (width / scaleFactor);
         canvasHeightInverse = (int) (height / scaleFactor);
+
+        try {
+            robot = new Robot();
+        } catch (AWTException e) {
+            e.printStackTrace();
+        }
+        addMouseMotionListener(new MouseStop());
+
+        BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+
+        Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+            cursorImg, new Point(0, 0), "blank cursor");
+
+        getContentPane().setCursor(blankCursor);
 
         setUndecorated(true); 
         setResizable(false);
@@ -52,6 +78,20 @@ public class SoftwareRenderer extends JFrame {
         canvasWidthInverse = (int) (width / scaleFactor);
         canvasHeightInverse = (int) (height / scaleFactor);
 
+        try {
+            robot = new Robot();
+        } catch (AWTException e) {
+            e.printStackTrace();
+        }
+        addMouseMotionListener(new MouseStop());    
+
+        BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+
+        Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+            cursorImg, new Point(0, 0), "blank cursor");
+
+        getContentPane().setCursor(blankCursor);
+
         setUndecorated(true); 
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -60,6 +100,33 @@ public class SoftwareRenderer extends JFrame {
         canvas = new BufferedImage((int)(width * scaleFactor), (int)(height * scaleFactor), BufferedImage.TYPE_INT_RGB);
 
         setVisible(true);
+    }
+
+    public void lockMouse() {robot.mouseMove(width / 2, height / 2);}
+
+    private static class MouseStop extends MouseAdapter {
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            int currentX = e.getX();
+            int currentY = e.getY();
+            mouseDiffX = currentX - mouseLastX;
+            mouseDiffY = currentY - mouseLastY;
+            mouseLastX = currentX;
+            mouseLastY = currentY;
+
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            System.out.println(true);
+            mouseIsDown = true;
+        }
+
+        @Override 
+        public void mouseReleased(MouseEvent e) {
+            mouseIsDown = false;
+        }
     }
 
     public void setPixel(int x, int y, int color) {
@@ -76,7 +143,7 @@ public class SoftwareRenderer extends JFrame {
         this.directionalLight = light;
     }
 
-    public void renderMeshes() {
+    public void renderMeshes() throws IOException {
         Graphics2D g2d = canvas.createGraphics();
         g2d.setColor(Color.BLACK);
         g2d.fillRect(0, 0, width, height);
@@ -130,6 +197,20 @@ public class SoftwareRenderer extends JFrame {
                 }
             }
         }
+    }
+
+    public int[][] get2DPixelArraySlow(BufferedImage sampleImage) {
+        int width = sampleImage.getWidth();
+        int height = sampleImage.getHeight();
+        int[][] result = new int[height][width];
+    
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                result[row][col] = sampleImage.getRGB(col, row);
+            }
+        }
+    
+        return result;
     }
 
     private void rasterizeTriangle(int color, int startX, int endX, int startY, int endY, int x0, int y0, int x1, int y1, int x2, int y2) {

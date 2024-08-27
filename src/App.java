@@ -1,5 +1,5 @@
 import BaseComponents.*;
-import Render_Pipeline.*;
+import RenderPipeline.*;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.Random;
@@ -20,7 +20,7 @@ public class App {
         Mesh meshCube = Mesh.createMeshCube(2, new Vector3(0, 0, 5));
         renderer.addMesh(meshCube);
 
-        DirectionalLight light1 = new DirectionalLight(.5f, new Vector3(0, 0, -1));
+        DirectionalLight light1 = new DirectionalLight(1f, new Vector3(0, 0, -1));
         renderer.setDirectionalLight(light1);
 
 
@@ -40,9 +40,15 @@ public class App {
         while (true) {
             Vector3 cubeCenter = meshCube.getCenter();
 
-            meshCube.rotateAroundXAxisWithPoint(0.001f * deltaTime, cubeCenter);
-            meshCube.rotateAroundYAxisWithPoint(0.001f * deltaTime, cubeCenter);
-            meshCube.rotateAroundZAxisWithPoint(0.001f * deltaTime, cubeCenter);
+            // meshCube.rotateAroundXAxisWithPoint(0.001f * deltaTime, cubeCenter);
+            // meshCube.rotateAroundYAxisWithPoint(0.001f * deltaTime, cubeCenter);
+            // meshCube.rotateAroundZAxisWithPoint(0.001f * deltaTime, cubeCenter);
+            // System.out.println(SoftwareRenderer.mouseDiffX);
+
+            // if (SoftwareRenderer.mouseIsDown) {
+                meshCube.rotateAroundYAxisWithPoint(0.0001f * deltaTime * -SoftwareRenderer.mouseDiffX, cubeCenter);
+                meshCube.rotateAroundXAxisWithPoint(0.0001f * deltaTime * SoftwareRenderer.mouseDiffY, cubeCenter);
+            // }
 
             renderer.renderMeshes();
 
@@ -52,7 +58,12 @@ public class App {
             deltaTime = endTime - startTime;
             startTime = endTime;
 
-            System.out.println("Render: " + deltaTime + "ms");
+            // System.out.println("Render: " + deltaTime + "ms");
+
+            renderer.lockMouse();
+
+            SoftwareRenderer.mouseDiffX = 0;
+            SoftwareRenderer.mouseDiffY = 0;
 
             try {
                 Thread.sleep(1000 / FPS_TARGET);
