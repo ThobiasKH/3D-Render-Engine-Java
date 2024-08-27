@@ -83,7 +83,19 @@ public class SoftwareRenderer extends JFrame {
         } catch (AWTException e) {
             e.printStackTrace();
         }
-        addMouseMotionListener(new MouseStop());    
+        addMouseMotionListener(new MouseStop()); 
+        
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                mouseIsDown = true;
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                mouseIsDown = false;
+            }
+        });
 
         BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 
@@ -118,14 +130,14 @@ public class SoftwareRenderer extends JFrame {
         }
 
         @Override
-        public void mouseClicked(MouseEvent e) {
-            System.out.println(true);
+        public void mouseDragged(MouseEvent e) {
             mouseIsDown = true;
-        }
-
-        @Override 
-        public void mouseReleased(MouseEvent e) {
-            mouseIsDown = false;
+            int currentX = e.getX();
+            int currentY = e.getY();
+            mouseDiffX = currentX - mouseLastX;
+            mouseDiffY = currentY - mouseLastY;
+            mouseLastX = currentX;
+            mouseLastY = currentY;
         }
     }
 

@@ -10,7 +10,7 @@ public class App {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();
         int screenHeight = (int) screenSize.getHeight();
-        float resScaleFactor = .25f;
+        float resScaleFactor = .5f;
 
         Camera.setAspectRatio( (float) screenHeight / (float) screenWidth );
         Camera.updateProjectionMatrix();
@@ -20,7 +20,7 @@ public class App {
         Mesh meshCube = Mesh.createMeshCube(2, new Vector3(0, 0, 5));
         renderer.addMesh(meshCube);
 
-        DirectionalLight light1 = new DirectionalLight(1f, new Vector3(0, 0, -1));
+        DirectionalLight light1 = new DirectionalLight(.5f, new Vector3(0, 0, -1));
         renderer.setDirectionalLight(light1);
 
 
@@ -43,12 +43,13 @@ public class App {
             // meshCube.rotateAroundXAxisWithPoint(0.001f * deltaTime, cubeCenter);
             // meshCube.rotateAroundYAxisWithPoint(0.001f * deltaTime, cubeCenter);
             // meshCube.rotateAroundZAxisWithPoint(0.001f * deltaTime, cubeCenter);
-            // System.out.println(SoftwareRenderer.mouseDiffX);
 
-            // if (SoftwareRenderer.mouseIsDown) {
+            if (SoftwareRenderer.mouseIsDown) {
                 meshCube.rotateAroundYAxisWithPoint(0.0001f * deltaTime * -SoftwareRenderer.mouseDiffX, cubeCenter);
                 meshCube.rotateAroundXAxisWithPoint(0.0001f * deltaTime * SoftwareRenderer.mouseDiffY, cubeCenter);
-            // }
+                // light1.rotateAroundYAxis(0.0001f * deltaTime * -SoftwareRenderer.mouseDiffX);
+                // light1.rotateAroundXAxis(0.0001f * deltaTime * SoftwareRenderer.mouseDiffY);
+            }
 
             renderer.renderMeshes();
 
