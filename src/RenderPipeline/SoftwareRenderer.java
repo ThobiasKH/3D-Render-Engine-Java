@@ -183,9 +183,13 @@ public class SoftwareRenderer extends JFrame {
                         color = adjustColorForLight(color, dp * this.directionalLight.getIntensity());
                     }
 
-                    Vector3 projectedV0 = Vector3.applyProjectionMatrix(t0, projectionMatrix);
-                    Vector3 projectedV1 = Vector3.applyProjectionMatrix(t1, projectionMatrix);
-                    Vector3 projectedV2 = Vector3.applyProjectionMatrix(t2, projectionMatrix);
+                    Vector3 tv0 = Vector3.applyProjectionMatrix(t0, Camera.getLookAtInverseMatrix());
+                    Vector3 tv1 = Vector3.applyProjectionMatrix(t1, Camera.getLookAtInverseMatrix());
+                    Vector3 tv2 = Vector3.applyProjectionMatrix(t2, Camera.getLookAtInverseMatrix());
+
+                    Vector3 projectedV0 = Vector3.applyProjectionMatrix(tv0, projectionMatrix);
+                    Vector3 projectedV1 = Vector3.applyProjectionMatrix(tv1, projectionMatrix);
+                    Vector3 projectedV2 = Vector3.applyProjectionMatrix(tv2, projectionMatrix);
                 
                     int x0 = (int) ( (projectedV0.getX() + 1) * 0.5f * (float)  canvasWidth);
                     int y0 = (int) ( (projectedV0.getY() + 1) * 0.5f * (float) canvasHeight);

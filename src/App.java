@@ -14,6 +14,7 @@ public class App {
 
         Camera.setAspectRatio( (float) screenHeight / (float) screenWidth );
         Camera.updateProjectionMatrix();
+        Camera.updateTransformMatrices();
 
         SoftwareRenderer renderer = new SoftwareRenderer(screenWidth, screenHeight, resScaleFactor);
 
