@@ -2,7 +2,6 @@ import BaseComponents.*;
 import RenderPipeline.*;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.util.Random;
 
 public class App {
     static final int FPS_TARGET = 60;
@@ -10,7 +9,7 @@ public class App {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();
         int screenHeight = (int) screenSize.getHeight();
-        float resScaleFactor = .5f;
+        float resScaleFactor = 1f;
 
         Camera.setAspectRatio( (float) screenHeight / (float) screenWidth );
         Camera.updateProjectionMatrix();
@@ -18,20 +17,23 @@ public class App {
 
         SoftwareRenderer renderer = new SoftwareRenderer(screenWidth, screenHeight, resScaleFactor);
 
-        Mesh meshCube = Mesh.createMeshCube(2, new Vector3(0, 0, 5));
+        // Mesh meshCube = Mesh.createMeshCube(2, new Vector3(0, 0, 5));
+        Mesh meshCube = new Mesh("src/models/12140_Skull_v3_L2.obj");
+        // Mesh meshCube = new Mesh("src/models/Sting-Sword-lowpoly.obj");
+        meshCube.move(new Vector3(0, 10, 85));
         renderer.addMesh(meshCube);
 
-        DirectionalLight light1 = new DirectionalLight(.5f, new Vector3(0, 0, -1));
+        DirectionalLight light1 = new DirectionalLight(1f, new Vector3(0, 0, -1));
         renderer.setDirectionalLight(light1);
 
 
-        Random rand = new Random();
-        int randomColor = 0;
-        Triangle[] cubeTris = meshCube.getTriangles();
-        for (int i = 0; i < 12; i++) {
-            if (i % 2 == 0) randomColor = rand.nextInt();
-            cubeTris[i].setColor(randomColor);
-        } 
+        // Random rand = new Random();
+        // int randomColor = 0;
+        // Triangle[] cubeTris = meshCube.getTriangles();
+        // for (int i = 0; i < 12; i++) {
+        //     if (i % 2 == 0) randomColor = rand.nextInt();
+        //     cubeTris[i].setColor(randomColor);
+        // } 
 
         long startTime = System.currentTimeMillis();
         long deltaTime = 1;
