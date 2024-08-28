@@ -2,6 +2,7 @@ import BaseComponents.*;
 import RenderPipeline.*;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.util.Random;
 
 public class App {
     static final int FPS_TARGET = 60;
@@ -18,22 +19,24 @@ public class App {
         SoftwareRenderer renderer = new SoftwareRenderer(screenWidth, screenHeight, resScaleFactor);
 
         // Mesh meshCube = Mesh.createMeshCube(2, new Vector3(0, 0, 5));
-        Mesh meshCube = new Mesh("src/models/12140_Skull_v3_L2.obj");
+        // Mesh meshCube = new Mesh("src/models/12140_Skull_v3_L2.obj");
         // Mesh meshCube = new Mesh("src/models/Sting-Sword-lowpoly.obj");
-        meshCube.move(new Vector3(0, 10, 85));
+        Mesh meshCube = new Mesh("src/models/lego obj.obj");
+        meshCube.move(new Vector3(-45, -20, 85));
+        meshCube.rotateAroundXAxisWithPoint((float)Math.PI, meshCube.getCenter());
         renderer.addMesh(meshCube);
 
-        DirectionalLight light1 = new DirectionalLight(1f, new Vector3(0, 0, -1));
+        DirectionalLight light1 = new DirectionalLight(1f, new Vector3(1, 0, -0));
         renderer.setDirectionalLight(light1);
 
 
-        // Random rand = new Random();
-        // int randomColor = 0;
-        // Triangle[] cubeTris = meshCube.getTriangles();
-        // for (int i = 0; i < 12; i++) {
-        //     if (i % 2 == 0) randomColor = rand.nextInt();
-        //     cubeTris[i].setColor(randomColor);
-        // } 
+        Random rand = new Random();
+        int randomColor = 0;
+        Triangle[] cubeTris = meshCube.getTriangles();
+        for (int i = 0; i < 12; i++) {
+            if (i % 2 == 0) randomColor = rand.nextInt();
+            cubeTris[i].setColor(randomColor);
+        } 
 
         long startTime = System.currentTimeMillis();
         long deltaTime = 1;
